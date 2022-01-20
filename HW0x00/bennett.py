@@ -1,29 +1,38 @@
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
+def plotcsv(file):
     ''' 
         @brief              unpacks data from a CSV file and plots it
     '''
-    plt.clf()
-    disfile = "test2.csv"
-    
     ## X Data, Columns 1
     x = []
     ## Y Data, Columns 2
     y = []
     
     # reads File and sorts data into lists of data
-    with open(disfile, 'r') as file:
+    with open(file, 'r',encoding='utf-8-sig') as file:
         rawdata = file.read()
-        rows = [[ints for ints in rows.strip().split(',')] for rows in rawdata.strip().split('\n')]
-    for val in rows:
+    for val in [[ints for ints in rows.strip().split(',')] for rows in rawdata.strip().split('\n')]:
         # Converts the first two columns into floats and records them
-        if val[0].replace('-','').replace('.','').isnumeric() and val[1].replace('-','').replace('.','').isnumeric():
-            x.append(float(val[0]))
-            y.append(float(val[1]))
-    
+        try:
+            num1 = float(val[0])
+            num2 = float(val[1])
+        except:
+            pass
+        else:
+            x.append(num1)
+            y.append(num2)
+            
     # Plots data
     plt.plot(x,y)
     plt.ylabel('y Data');
     plt.xlabel('x Data');
     plt.title('CSV file: {:}, plotted as (x,y) data'.format(disfile));
+    
+if __name__ == '__main__':
+    ''' 
+        @brief              runs csv file plotting function
+    '''
+    disfile = "test2.csv"
+    plotcsv(disfile)
+    

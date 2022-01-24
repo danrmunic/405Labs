@@ -15,3 +15,7 @@ This Reposity hold documentation for each of our labs. Lab0 - Lab5 and Term Proj
 ## Documentation
 
 * [View Documentation](https://github.com/danrmunic/405Labs/tree/main/Lab1/docs)
+
+## Website Link
+
+https://danrmunic.github.io/405Labs/

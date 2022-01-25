@@ -9,10 +9,14 @@
     @date January 11, 2022    
 '''
 import pyb
-
+import math
 
 ## @brief Encoder_Period the value/ period of ticks before the encoder overflows
 Encoder_Period = 2**16
+Ticks_Per_Revolution = 16384
+
+def to_radians(ticks):
+        return (float(ticks) / Ticks_Per_Revolution) * 2 * math.pi 
 
 class Encoder:
     '''!@brief An Encoder class implements a motor driver for an ME405 kit.
@@ -50,6 +54,12 @@ class Encoder:
         '''
         return self.position
 
+    def read_radians(self):
+        '''!@brief This function is called when we want to read the current motor position in radians..
+            @return Current encoder position in radians.
+        '''
+        return to_radians(read())
+
     def updatePosition(self):
         '''!@brief This function updates the current position.
             @details It uses the current encoder position and the previous encoder position
@@ -68,15 +78,15 @@ class Encoder:
 
         self.position = self.position + delta
 
-
-import utime
-if __name__ == '__main__':
-    pinCH1 = pyb.Pin.cpu.B6
-    pinCH2 = pyb.Pin.cpu.B7
-
-    myEncoder = Encoder(pinCH1, pinCH2, 4)
-
-    while True:
-        utime.sleep(.5)
-        myEncoder.updatePosition()
-        print(myEncoder.read())
+#testing
+#import utime
+#if __name__ == '__main__':
+#    pinCH1 = pyb.Pin.cpu.B6
+#    pinCH2 = pyb.Pin.cpu.B7
+#
+#    myEncoder = Encoder(pinCH1, pinCH2, 4)
+#
+#    while True:
+#        utime.sleep(.5)
+#        myEncoder.updatePosition()
+#        print(myEncoder.read())

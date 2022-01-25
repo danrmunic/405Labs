@@ -3,7 +3,7 @@
     @brief Main file runs tasks through loop.
     @details Runs through seperate tasks to test testing the motor_drive task and the encoder task.
             The user can exit program by pressing cntrl+c
-    @author Rodolfo Diaz
+    @author Rodi Diaz
     @author Daniel Munic
     @author John Bennett
     @date January 11, 2022    
@@ -13,6 +13,14 @@ import motor_driver
 import pyb
 import utime
 import closedLoop
+
+def check_user_input(input):
+    while True:
+        try:
+            # Convert it into float
+            return float(input)
+        except ValueError:
+            print("No.. input is not a number. It's a string")
 
 if __name__ == '__main__':
     '''! @brief Runs main code
@@ -58,43 +66,63 @@ if __name__ == '__main__':
     
     # controlers
     ## controler object for motor 1 with kp gain of 5
-    control1 = closedLoop.ClosedLoop(5)
+    control1 = closedLoop.ClosedLoop(10)
     
     ## controler object for motor 2 with kp gain of 5
-    control2 = closedLoop.ClosedLoop(5)
+    control2 = closedLoop.ClosedLoop(10)
     
     ## Communication reader between Computer and Nucleo board so user can type commands
     CommReader = pyb.USB_VCP()
+    
+    ## motor 1 reference Position
+    refPos1 = 0
+    ## motor 2 reference Position
+    refPos2 = 0
+    
+    Time = utime.ticks_ms
+    ## @brief Defines period as what is called in main for period parameter
+    Contperiod = 10
+    ## @brief Time adjusts once clock reaches the period value plus the current time
+    next_time = Contperiod + Time() 
 
     while (True):
         try:
-            utime.sleep(.1)
             encoder1.updatePosition()
             encoder2.updatePosition()
             
-            print("\n_________State Data Display_________\n"
-                  "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
-                  "Motor2  :    theta = {:.2f}rad,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
-            if(CommReader.any()):
-                #Reads Most recent Command
-                keyCommand = CommReader.read(1)
-                # Clears Queue
-                CommReader.read()
-            else:
-                keyCommand = b' '
-            if(keyCommand[0] == b'w'[0]):
-                duty1 += 5
+            if (Time() >= next_time):
+                next_time += Contperiod
+                p1 = encoder1.read()
+                p2 = encoder2.read()
+                duty1 = control1.update(p1,Contperiod)
+                duty2 = control2.update(p2,Contperiod)
                 motor1.set_duty(duty1)
-                print("up")
-            elif(keyCommand[0] == b's'[0]):
-                duty1 -= 5
-                motor1.set_duty(duty1)
-            elif(keyCommand[0] == b'u'[0]):
-                duty2 += 5
-                motor2.set_duty(duty2)
-            elif(keyCommand[0] == b'j'[0]):
-                duty2 -= 5
-                motor2.set_duty(duty2)
+                motor2.set_duty(duty2)           
+            
+                print("\n_________State Data Display_________\n"
+                      "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
+                      "Motor2  :    theta = {:.2f}rad,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
+            
+                if(CommReader.any()):
+                    #Reads Most recent Command
+                    keyCommand = CommReader.read(1)
+                    # Clears Queue
+                    CommReader.read()
+                else:
+                    keyCommand = b' '
+                    
+                if(keyCommand[0] == b'k'[0]):
+                    control1.set_control_gain(check_user_input(input("Enter a Kp:")))
+                elif(keyCommand[0] == b'K'[0]):
+                    control2.set_control_gain(check_user_input(input("Enter a Kp:")))
+                elif(keyCommand[0] == b's'[0]):
+                    control1.set_setpoint(check_user_input(input("Enter a step:")))
+                elif(keyCommand[0] == b'S'[0]):
+                    control2.set_setpoint(check_user_input(input("Enter a step:")))
+                #elif(keyCommand[0] == b'e'[0]):
+                #    control1.print()
+                #elif(keyCommand[0] == b'E'[0]):
+                #    control2.print()
             
         except KeyboardInterrupt:
             break
@@ -102,4 +130,6 @@ if __name__ == '__main__':
     motor1.disable()
     motor2.disable()
     print('Program Terminating')
+    
+
     

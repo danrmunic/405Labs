@@ -58,7 +58,7 @@ class Encoder:
         '''!@brief This function is called when we want to read the current motor position in radians.
             @return Current encoder position in radians.
         '''
-        return to_radians(read_ticks())
+        return to_radians(self.read_ticks())
 
     def updatePosition(self):
         '''!@brief This function updates the current position.

@@ -48,17 +48,17 @@ class Encoder:
         self.position = self.timer.counter()
         
 
-    def read(self):
+    def read_ticks(self):
         '''!@brief This function is called when we want to read the current motor position.
             @return Current encoder position.
         '''
         return self.position
 
-    def read_radians(self):
-        '''!@brief This function is called when we want to read the current motor position in radians..
+    def read(self):
+        '''!@brief This function is called when we want to read the current motor position in radians.
             @return Current encoder position in radians.
         '''
-        return to_radians(read())
+        return to_radians(read_ticks())
 
     def updatePosition(self):
         '''!@brief This function updates the current position.

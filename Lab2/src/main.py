@@ -12,6 +12,7 @@ import Encoder
 import motor_driver
 import pyb
 import utime
+import closedLoop
 
 if __name__ == '__main__':
     '''! @brief Runs main code
@@ -55,12 +56,16 @@ if __name__ == '__main__':
     ## motor 2 encoder object
     encoder2 = Encoder.Encoder(pinC6, pinC7, 8)
     
+    # controlers
+    ## controler object for motor 1 with kp gain of 5
+    control1 = closedLoop.ClosedLoop(5)
+    
+    ## controler object for motor 2 with kp gain of 5
+    control2 = closedLoop.ClosedLoop(5)
+    
     ## Communication reader between Computer and Nucleo board so user can type commands
     CommReader = pyb.USB_VCP()
-    ## motor 1 current duty
-    duty1 = 0
-    ## motor 2 current duty
-    duty2 = 0
+
     while (True):
         try:
             utime.sleep(.1)
@@ -68,8 +73,8 @@ if __name__ == '__main__':
             encoder2.updatePosition()
             
             print("\n_________State Data Display_________\n"
-                  "Motor1  :    theta = {:.2f}ticks,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
-                  "Motor2  :    theta = {:.2f}ticks,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
+                  "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
+                  "Motor2  :    theta = {:.2f}rad,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
             if(CommReader.any()):
                 #Reads Most recent Command
                 keyCommand = CommReader.read(1)

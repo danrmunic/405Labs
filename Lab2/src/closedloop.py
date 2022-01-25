@@ -1,11 +1,10 @@
 '''!
     @file closedloop.py
     @brief Closed loop controller containing methods to control an arbitraries motor duty cycle
-    @details Controller uses the difference of reference and current values to create an error variable. PID gains, the time 
+    @details Controller uses the difference of reference and current values to create an error variable. the time 
              difference, and magnitude of error are then used in the update method to return a duty for the motor to be run.
-    @author Christian Clephan
     @author John Bennett
-    @date   November 9, 2021
+    @date   January 25, 2022
 '''
 
 class ClosedLoop:
@@ -14,16 +13,16 @@ class ClosedLoop:
                                 loop control.
     '''
         
-    def __init__ (self,Kp,Ki = 0, Kd = 0, satLim = [-100,100]):
+    def __init__ (self, setpoint, Kp, Ki = 0, Kd = 0, satLim = [-100,100]):
         '''!@brief Constructs a closed loop controller
-            @details Sets PID and saturation limits to what is determined by task_hardware and instantiates error variables.
-            @param PID is a list containing the three gain values for Kp/Ki/Kd
+            @details Sets saturation limits to what is determined by task_hardware and instantiates error variables.
             @param satLim is a list containing the upper and lower bounds of saturation      
         '''
-        ## @brief Instantiates PID controller with gains
+        ## @brief Instantiates gains and setpoint
         self.Kp = Kp
         self.Kd = Kd
         self.Ki = Ki
+        self.setpoint = setpoint
         # PID Kp(*%/rad)Ki(*%/rad)Kd(*%s2/rad)
         ## @brief Instantiates duty saturation upper and lower bounds
         self.satLim = satLim
@@ -33,15 +32,14 @@ class ClosedLoop:
         ## @brief Previous error
         self.laste = 0
 
-    def update (self,Ref, Read, tdif):
+    def update (self, read, tdif):
         ''' @brief Constructs a closed loop controller
-            @details Sets PID and saturation limits to what is determined by task_hardware and instantiates error variables.
-            @param PID is a list containing the three gain values for Kp/Ki/Kd
+            @details Sets saturation limits to what is determined by task_hardware and instantiates error variables.
             @param satLim is a list containing the upper and lower bounds of saturation    
             @return Sends back saturated duty value using sat method.
         '''
-        ## @brief Error signal which is the difference between a reference and input (current) value.
-        e = Ref - Read
+        ## @brief Error signal which is the difference between the expected setpoint and the measured value [read].
+        e = self.setpoint - read
         #Updates sum of error (area under curve)
         self.esum += (self.laste+e)*tdif/2
         ## @brief Delta error calculated by taking difference in error values over a time difference
@@ -49,34 +47,24 @@ class ClosedLoop:
         # Updates last error
         self.laste = e
         
-
-        
-        ## @brief Duty calculation using PID gains and error values
-        duty = self.Kp*(e) + self.Ki*(self.esum) + self.Kd*(dele) 
-        return self.sat(duty)
+        ## @brief Actuation signal (in duty cycle) calculation using gains and error values
+        actuation_signal = self.Kp*(e) + self.Ki*(self.esum) + self.Kd*(dele) 
+        return self.sat(actuation_signal)
                 
-    def get_PID(self):
-        ''' @brief Gets PID object
-            @details Quick method to determine what controller is using for PID gains.     
-        '''
-        return self.PID
-    
-    def set_PID(self, PID):
-        ''' @brief Sets PID gains.
-            @details Sets PID gains to some new list of values for Kp/Ki/Kd 
-            @param PID is a list containing the three gain values for Kp/Ki/Kd    
-        '''
-        self.PID = PID
-        
     def sat(self,duty):
         ''' @brief Saturation functionallity
             @details Controls if a duty is too large from what is calculated in update method.
-            @param sat_duty is the value sent by what is calculated in update method.
+            @param duty is the value sent by what is calculated in update method.
             @return Sends back either the saturated limit if duty is too high or original duty based on bounds.
         '''
-       
         if duty<self.satLim[0]:
             return self.satLim[0]
         elif duty>self.satLim[1]:
             return self.satLim[1]
         return duty
+
+    def set_setpoint(self, point):
+        self.setpoint = point
+
+    def set_control_gain(self, gain):
+        self.Kp = gain

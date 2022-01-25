@@ -14,31 +14,43 @@ import pyb
 import utime
 
 if __name__ == '__main__':
-    ''' @brief Runs main code
+    '''! @brief Runs main code
     '''
+    ## motor 1 timer (3)
     tim3 = pyb.Timer(3, freq = 20000)
+    ## motor 1 pin B4
     pinB4 = pyb.Pin(pyb.Pin.cpu.B4)
+    ## motor 1 pin B5
     pinB5 = pyb.Pin(pyb.Pin.cpu.B5)
+    ## motor 1 pin Enable Pin A10
     pinENA = pyb.Pin(pyb.Pin.cpu.A10, pyb.Pin.IN, pull = pyb.Pin.PULL_UP)
     ## motor 1 object
     motor1 = motor_driver.Motor_Driver(pinB4, pinB5, tim3, pinENA)
     
     # motor 2
+    ## motor 2 timer (5)
     tim5 = pyb.Timer(5, freq = 20000)
+    ## motor 2 pin A0
     pinA0 = pyb.Pin(pyb.Pin.cpu.A0)
+    ## motor 2 pin A1
     pinA1 = pyb.Pin(pyb.Pin.cpu.A1)
+    ## motor 2 pin Enable Pin C1
     pinENB = pyb.Pin(pyb.Pin.cpu.C1, pyb.Pin.IN, pull = pyb.Pin.PULL_UP)
     ## motor 2 object
     motor2 = motor_driver.Motor_Driver(pinA0, pinA1, tim5, pinENB)
     
     # encoder 1
+    ## encoder 1 pin B6
     pinB6 = pyb.Pin.cpu.B6
+    ## encoder 1 pin B7
     pinB7 = pyb.Pin.cpu.B7
     ## motor 1 encoder object
     encoder1 = Encoder.Encoder(pinB6, pinB7, 4)
     
     # encoder 2
+    ## motor 2 encoder pin C6
     pinC6 = pyb.Pin.cpu.C6
+    ## motor 2 encoder pin C7
     pinC7 = pyb.Pin.cpu.C7
     ## motor 2 encoder object
     encoder2 = Encoder.Encoder(pinC6, pinC7, 8)

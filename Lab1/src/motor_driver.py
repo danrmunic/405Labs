@@ -11,12 +11,12 @@
 import pyb
 
 class Motor_Driver:
-    ''' @brief A motor class implements a motor driver for an ME405 kit.
+    '''!@brief A motor class implements a motor driver for an ME405 kit.
         @details Objects of this class can be used to apply PWM to a given
                  DC motor.
     '''
     def __init__ (self,pinCH1,pinCH2,timX,pinEN):
-        ''' @brief Initializes and creates a motor object.
+        '''!@brief Initializes and creates a motor object.
             @details Creates timer channels that will be used specific to each motor channel to control motor function.
             @param motorChannel moter driver channel
             @param pinCH1 First pin for configuring motor
@@ -34,12 +34,12 @@ class Motor_Driver:
         self.enable()
         
     def set_duty (self, duty):
-        ''' @brief Set the PWM duty cycle for the motor channel.
+        '''!@brief Set the PWM duty cycle for the motor channel.
             @details This method sets the duty cycle to the motor to the given level. Positive values
                     cause effort in one direction, negative values
                     in the opposite direction.
-            @param duty A signed number between -100 and 100 representing the duty
-                      cycle of the PWM signal sent to the motor
+            @param Duty A signed number between -100 and 100 representing the duty
+                      cycle of the PWM signal sent to the motor.
         '''
         #if duty is positive then set the first channel to specified duty and other to 0.
         if duty >= 0:
@@ -59,12 +59,12 @@ class Motor_Driver:
                 self.t2c1.pulse_width_percent(0)
     
     def enable(self):
-        ''' @brief initiates motor by switching the enable pin to high
+        '''!@brief Initiates motor by switching the enable pin to high
         '''
         self.pinEN.high()
     
     def disable(self):
-        ''' @brief deinitiates motor by switching the enable pin to low and sets duty to zero 
+        '''!@brief Deinitiates motor by switching the enable pin to low and sets duty to zero 
         '''
         self.set_duty(0)
         self.pinEN.low()

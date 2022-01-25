@@ -15,12 +15,12 @@ import pyb
 Encoder_Period = 2**16
 
 class Encoder:
-    ''' @brief An Encoder class implements a motor driver for an ME405 kit.
+    '''!@brief An Encoder class implements a motor driver for an ME405 kit.
         @details Objects of this class can be used to read encoder data based
                 on the position of a given DC motor.
     '''
     def __init__(self, pinCH1, pinCH2, timerNum):
-        ''' @brief Initializes and creates a encoder object.
+        '''!@brief Initializes and creates a encoder object.
             @details Creates timer channels that will be used to track the motors position through the encoder.
             @param pinCH1 First pin for configuring encoder.
             @param pinCH2 Second pin for configuring encoder.
@@ -37,7 +37,7 @@ class Encoder:
         self.Eposition = self.timer.counter()
 
     def zero(self):
-        ''' @brief zeros the position and the encoder position.
+        '''!@brief Zeros the position and the encoder position.
         '''
         self.timer.counter(0)
         self.Eposition = self.timer.counter()
@@ -45,14 +45,14 @@ class Encoder:
         
 
     def read(self):
-        ''' @brief this function is called when we want to read the current motor position.
-            @return current encoder position.
+        '''!@brief This function is called when we want to read the current motor position.
+            @return Current encoder position.
         '''
         return self.position
 
     def updatePosition(self):
-        ''' @brief this function updates the current position.
-            @details it uses the current encoder position and the previous encoder position
+        '''!@brief This function updates the current position.
+            @details It uses the current encoder position and the previous encoder position
                     the calculate the delta to add to the unbounded position value while keeping
                     track of over flows.
         '''

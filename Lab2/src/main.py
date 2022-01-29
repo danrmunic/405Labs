@@ -99,9 +99,9 @@ if __name__ == '__main__':
                 motor1.set_duty(duty1)
                 motor2.set_duty(duty2)           
             
-                print("\n_________State Data Display_________\n"
-                      "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
-                      "Motor2  :    theta = {:.2f}rad,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
+#                 print("\n_________State Data Display_________\n"
+#                       "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
+#                       "Motor2  :    theta = {:.2f}rad,\tduty(\"u\":+5%,\"j\":-5%) = {:.2f}%\n".format(encoder1.read(),duty1,encoder2.read(),duty2),end="")
             
                 if(CommReader.any()):
                     #Reads Most recent Command
@@ -119,10 +119,6 @@ if __name__ == '__main__':
                     control1.set_setpoint(check_user_input(input("Enter a step:")))
                 elif(keyCommand[0] == b'S'[0]):
                     control2.set_setpoint(check_user_input(input("Enter a step:")))
-                #elif(keyCommand[0] == b'e'[0]):
-                #    control1.print()
-                #elif(keyCommand[0] == b'E'[0]):
-                #    control2.print()
             
         except KeyboardInterrupt:
             break

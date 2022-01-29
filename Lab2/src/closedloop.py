@@ -65,6 +65,7 @@ class ClosedLoop:
         elif (self.recording):
             self.print_values()
             self.recording = False
+            print("#STOP#")
             
         return self.sat(actuation_signal)
                 

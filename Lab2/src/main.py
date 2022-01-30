@@ -14,13 +14,19 @@ import pyb
 import utime
 import closedLoop
 
-def check_user_input(input):
+def check_user_input(prompt):
     while True:
         try:
             # Convert it into float
-            return float(input)
+            print(prompt)
+            num = input()
+            return float(num)
         except ValueError:
-            print("No.. input is not a number. It's a string")
+            print("No.. "+ num +" input is not a number. It's a string. Enter a Number")
+#     Commandline()
+    
+# def Commandline():
+#     print("Ready for next command. Hit characters s,S Steps. k,K Kp.")
 
 if __name__ == '__main__':
     '''! @brief Runs main code
@@ -81,7 +87,7 @@ if __name__ == '__main__':
     
     Time = utime.ticks_ms
     ## @brief Defines period as what is called in main for period parameter
-    Contperiod = 10
+    Contperiod = 4
     ## @brief Time adjusts once clock reaches the period value plus the current time
     next_time = Contperiod + Time() 
 
@@ -112,13 +118,15 @@ if __name__ == '__main__':
                     keyCommand = b' '
                     
                 if(keyCommand[0] == b'k'[0]):
-                    control1.set_control_gain(check_user_input(input("Enter a Kp:")))
+                    control1.set_control_gain(check_user_input("Enter a Kp:"))
                 elif(keyCommand[0] == b'K'[0]):
-                    control2.set_control_gain(check_user_input(input("Enter a Kp:")))
+                    control2.set_control_gain(check_user_input("Enter a Kp:"))
                 elif(keyCommand[0] == b's'[0]):
-                    control1.set_setpoint(check_user_input(input("Enter a step:")))
+                    control1.set_setpoint(check_user_input("Enter a step:"))
+                    next_time = Contperiod + Time() 
                 elif(keyCommand[0] == b'S'[0]):
-                    control2.set_setpoint(check_user_input(input("Enter a step:")))
+                    control2.set_setpoint(check_user_input("Enter a step:"))
+                    next_time = Contperiod + Time() 
             
         except KeyboardInterrupt:
             break

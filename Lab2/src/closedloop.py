@@ -8,6 +8,7 @@
 '''
 
 import utime
+import array
 
 class ClosedLoop:
     '''!@brief                  Interface with closed loop controller
@@ -37,8 +38,8 @@ class ClosedLoop:
         
         self.Time = utime.ticks_ms
         self.to = self.Time()
-        self.times = []
-        self.positions = []
+        self.times = array.array('l',[])
+        self.positions = array.array('l',[])
         self.recording = False
 
     def update (self, read, tdif):
@@ -59,10 +60,11 @@ class ClosedLoop:
         ## @brief Actuation signal (in duty cycle) calculation using gains and error values
         actuation_signal = self.Kp*(e) + self.Ki*(self.esum) + self.Kd*(dele)
         
-        if(len(self.times) < 100 and self.recording):
+        if(len(self.times) < 500 and self.recording):
             self.times.append(utime.ticks_diff(self.Time(),self.to))
             self.positions.append(read)
         elif (self.recording):
+            print("#START#")
             self.print_values()
             self.recording = False
             print("#STOP#")
@@ -90,8 +92,8 @@ class ClosedLoop:
         self.Kp = gain
         
     def record(self):
-        self.times = []
-        self.positions = []
+        self.times = array.array('l',[])
+        self.positions = array.array('f',[])
         self.recording = True
         
     def print_values(self):

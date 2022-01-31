@@ -2,10 +2,11 @@ import serial
 import time
 import matplotlib.pyplot as plt
 
+## current Kp being tested.
 kp = 0
 def plotCOMData(s_port):
-    ''' 
-        @brief              unpacks data from a CSV file and plots it
+    '''!@brief reads data from s_port seperates it into x, y data and plots it.
+        @param Current serial port
     '''
     ## X Data, Columns 1
     x = []
@@ -32,6 +33,9 @@ def plotCOMData(s_port):
     plt.show()
     
 def write_step(s_port):
+    '''!@brief a generator that iterates between sending new Kp and step values to the s_port.
+        @param Current serial port
+    '''
     b = 1
     readVal = "0"
     while True:
@@ -51,7 +55,7 @@ def write_step(s_port):
             time.sleep(.1)
             if b == 0:
                 time.sleep(2)
-            if b == 1:
+            else:
                 global kp
                 kp = s_port.readline().replace(b'\r\n', b'').decode()
             s_port.readline()
@@ -62,10 +66,10 @@ def write_step(s_port):
         
 
 if __name__ == '__main__':
-    ''' 
-        @brief              runs csv file plotting function
+    '''!@brief Communicates with the micro Python Board through the serial board
+        @details Opens a spesified seiral port and iterates through writting new proportional gains and step inputs.
+                 Then plotting it.
     '''
-    
     COM = 'COM12'
     Speed = 115200
     
@@ -73,7 +77,7 @@ if __name__ == '__main__':
     
     with serial.Serial(COM, Speed,timeout=1) as s_port:
         commandCycle = write_step(s_port)
-
+        s_port.reset_output_buffer()
         
         while (True):
             try:

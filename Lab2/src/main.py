@@ -85,6 +85,7 @@ if __name__ == '__main__':
     ## motor 2 reference Position
     refPos2 = 0
     
+    ## Time is some dumb timer function that replaces utime.ticks_ms
     Time = utime.ticks_ms
     ## @brief Defines period as what is called in main for period parameter
     Contperiod = 4
@@ -98,12 +99,9 @@ if __name__ == '__main__':
             
             if (Time() >= next_time):
                 next_time += Contperiod
-                p1 = encoder1.read()
-                p2 = encoder2.read()
-                duty1 = control1.update(p1,Contperiod)
-                duty2 = control2.update(p2,Contperiod)
-                motor1.set_duty(duty1)
-                motor2.set_duty(duty2)           
+
+                motor1.set_duty(control1.update(encoder1.read(),Contperiod))
+                motor2.set_duty(control2.update(encoder2.read(),Contperiod))           
             
 #                 print("\n_________State Data Display_________\n"
 #                       "Motor1  :    theta = {:.2f}rad,\tduty(\"w\":+5%,\"s\":-5%) = {:.2f}%\n"
@@ -111,6 +109,7 @@ if __name__ == '__main__':
             
                 if(CommReader.any()):
                     #Reads Most recent Command
+                    ## Stores the most recent key pressed
                     keyCommand = CommReader.read(1)
                     # Clears Queue
                     CommReader.read()

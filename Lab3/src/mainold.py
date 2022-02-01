@@ -16,12 +16,13 @@ import closedLoop
 
 def check_user_input(prompt):
     while True:
-        print(prompt)
         try:
             # Convert it into float
+            print(prompt)
             num = input()
             return float(num)
         except ValueError:
+            print("No.. "+ num +" input is not a number. It's a string. Enter a Number")
 #     Commandline()
     
 # def Commandline():

@@ -29,6 +29,7 @@ def plotCOMData(s_port):
     plt.plot(x,y,1)
     plt.ylabel('Position rad')
     plt.xlabel('Time ms')
+    #plt.ylim(0,max(y)+1)
     plt.title('Plotted as (x,y) data. Kp = {:}'.format(kp))
     plt.show()
     

@@ -50,14 +50,17 @@ def task_motor1 ():
     ## motor 1 encoder object
     encoder1 = Encoder.Encoder(pinB6, pinB7, 4)
     
+    control1 = closedLoop.ClosedLoop(50)
+    
+    
     while True:
         encoder1.updatePosition()
         
         motor1.set_duty(control1.update(encoder1.read(),10))
         
-        #control1.set_setpoint(counter)
-        
-        #counter += step
+        if keyShare.get() == 1:
+            encoder1.zero()
+            control1.set_setpoint(20)
         
         yield (0)
     
@@ -83,85 +86,83 @@ def task_motor2 ():
     ## motor 2 encoder pin C7
     pinC7 = pyb.Pin.cpu.C7
     ## motor 2 encoder object
-    encoder2 = Encoder.Encoder(pinC6, pinC7, 8) 
+    encoder2 = Encoder.Encoder(pinC6, pinC7, 8)
+    
+    control2 = closedLoop.ClosedLoop(50)
     
     while True:
         
-        encoder2.updatePosition()
-        
+        encoder2.updatePosition()        
         motor2.set_duty(control2.update(encoder2.read(),10))
-        
+        if keyShare.get() == 2:
+            encoder2.zero()
+            control2.set_setpoint(20)
         yield (0)
 
-#terrible code below, please ignore
-def save_and_set(tempy, var):
-    save = var
-    tempy.set(save)
-    return save == b'a\r\n' or save == b'b\r\n'
+def task_user ():
+    """
+    Task which
+    """
+    vcp = pyb.USB_VCP ()
     
-class tempy:
-    #class that exists just to store a value so we can change it inside a function
-    def __init__(self, var):
-        self.var = var
-    def get(self):
-        return self.var
-    def set(self, var):
-        self.var = var
+    while True:
+        yield (0)
+        if vcp.any():
+            command = vcp.read(1)
+            if command == b'a':
+                keyShare.put(1)
+            elif command == b'b':
+                keyShare.put(2)
+            elif command == b'c':
+                print("read")
+                keyShare.put(-1)
+                
+            print(vcp.read())
+        
+    
     
 # This code creates a share, a queue, and two tasks, then starts the tasks. The
 # tasks run until somebody presses ENTER, at which time the scheduler stops and
 # printouts show diagnostic information about the tasks, share, and queue.
 if __name__ == "__main__":
-    print ('\033[2JTesting ME405 stuff in cotask.py and task_share.py\r\n'
-           'Press ENTER to stop and show diagnostics.')                           
-
-    control1 = closedLoop.ClosedLoop(50)
     
-    counter1 = 0
+    while True:
+        print ('\033[2J________Running__LAB03________ \r\n'
+           'Press \"a\" or \"b\" to step motor 1 or 2 20 radians.'
+           'Press \"c\" to stop and show diagnostics.')
     
-    ## controler object for motor 2 with kp gain of 5
-    control2 = closedLoop.ClosedLoop(50)
-    
-    counter2 = 0
-    
-    num = check_user_input("Select a motor Period")
-    
-    # Create the tasks. If trace is enabled for any task, memory will be
-    # allocated for state transition tracing, and the application will run out
-    # of memory after a while and quit. Therefore, use tracing only for 
-    # debugging and set trace to False when it's not needed
-    task1 = cotask.Task (task_motor1, name = 'Task_Motor1', priority = 1, 
-                         period = num, profile = True, trace = False)
-    task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 1, 
-                         period = num, profile = True, trace = False)
-    cotask.task_list.append (task1)
-    cotask.task_list.append (task2)
-
-    # Run the memory garbage collector to ensure memory is as defragmented as
-    # possible before the real-time scheduler is started
-    gc.collect ()
-
-    # Run the scheduler with the chosen scheduling algorithm. Quit if any 
-    # character is received through the serial port
-    vcp = pyb.USB_VCP ()
-    vcp.read ()
-    prev_char = tempy(None)
-    while not vcp.any () or save_and_set(prev_char, vcp.read()):
-        cotask.task_list.pri_sched ()
-        if prev_char.get() is not None:
-            if prev_char.get() == b'a\r\n':
-                counter1 += 20
-                control1.set_setpoint(counter1)
-            if prev_char.get() == b'b\r\n':
-                counter2 += 20
-                control2.set_setpoint(counter2)
-            prev_char.set(None)
+        keyShare = task_share.Share ('h', thread_protect = False, name = "Share 0")
         
-    # Empty the comm port buffer of the character(s) just pressed
-    vcp.read ()
-
-    # Print a table of task data and a table of shared information data
-    print ('\n' + str (cotask.task_list))
-    print (task_share.show_all ())
-    #print (task1.get_trace ())
-    print ('\r\n')
+        num = check_user_input("Select a motor Period:")
+        
+        # Create the tasks. If trace is enabled for any task, memory will be
+        # allocated for state transition tracing, and the application will run out
+        # of memory after a while and quit. Therefore, use tracing only for 
+        # debugging and set trace to False when it's not needed
+        task1 = cotask.Task (task_motor1, name = 'Task_Motor1', priority = 1, 
+                         period = num, profile = True, trace = False)
+        task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 1, 
+                             period = num, profile = True, trace = False)
+        task3 = cotask.Task (task_user, name = 'Task_User', priority = 1, 
+                             period = 100, profile = True, trace = False)
+        cotask.task_list = cotask.TaskList()
+        cotask.task_list.append (task1)
+        cotask.task_list.append (task2)
+        cotask.task_list.append (task3)
+        
+        # Run the memory garbage collector to ensure memory is as defragmented as
+        # possible before the real-time scheduler is started
+        gc.collect ()
+        
+        # Run the scheduler with the chosen scheduling algorithm. Quit if any 
+        # character is received through the serial port
+        while keyShare.get() != -1:
+            cotask.task_list.pri_sched ()
+        
+        keyShare.put(2318008)
+        
+        # Print a table of task data and a table of shared information data
+        print ('\n' + str (cotask.task_list))
+        print (task_share.show_all ())
+        print (task1.get_trace ())
+        print ('\r\n')

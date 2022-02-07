@@ -2,8 +2,8 @@ import serial
 import time
 import matplotlib.pyplot as plt
 
-## current Kp being tested.
-kp = 0
+## current MPeriod being tested.
+MPeriod = 0
 def plotCOMData(s_port):
     '''!@brief reads data from s_port seperates it into x, y data and plots it.
         @param Current serial port
@@ -30,29 +30,32 @@ def plotCOMData(s_port):
     plt.ylabel('Position rad')
     plt.xlabel('Time ms')
     #plt.ylim(0,max(y)+1)
-    plt.title('Plotted as (x,y) data.")
+    plt.title('Plotted as (x,y) data. Motor period = {:}'.format(MPeriod))
     plt.show()
     
 def write_step(s_port):
     '''!@brief a generator that iterates between sending new Kp and step values to the s_port.
         @param Current serial port
     '''
-    b = 1
     readVal = "0"
+    tf = time.time()
     while True:
         yield readVal
-
-
+        
         s_port.reset_output_buffer()
-        readVal = s_port.readline().replace(b'\r\n', b'')
-        if readVal != b"#START#":
+        readVal = s_port.readline().replace(b'\r\n', b'').decode()
+        if tf < time.time():
+            s_port.reset_input_buffer()
+            s_port.write(input("input a char:").encode("UTF-8") + b'\r\n')
+            tf = time.time() + 3
+            time.sleep(.1)
+        elif ":" in readVal:
             s_port.reset_input_buffer()
             s_port.write(input(readVal).encode("UTF-8") + b'\r\n')
             time.sleep(.1)
-            if b == 0:
-                time.sleep(2)
-            s_port.readline()
-            b^=1
+        elif not (readVal == "" or "\r\n" in readVal):
+            print(readVal + "gf")
+
 
         
 

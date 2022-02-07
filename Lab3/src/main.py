@@ -61,7 +61,10 @@ def task_motor1 ():
         if keyShare.get() == 1:
             encoder1.zero()
             control1.set_setpoint(20)
-        
+            keyShare.put(0)
+        elif keyShare.get() == 3:
+            encoder1.zero()
+            control1.set_setpoint(20)
         yield (0)
     
 def task_motor2 ():
@@ -97,6 +100,11 @@ def task_motor2 ():
         if keyShare.get() == 2:
             encoder2.zero()
             control2.set_setpoint(20)
+            keyShare.put(0)
+        elif keyShare.get() == 3:
+            encoder2.zero()
+            control2.set_setpoint(20)
+            keyShare.put(0)
         yield (0)
 
 def task_user ():
@@ -111,6 +119,8 @@ def task_user ():
             command = vcp.read(1)
             if command == b'a':
                 keyShare.put(1)
+            elif command == b'd':
+                keyShare.put(3)
             elif command == b'b':
                 keyShare.put(2)
             elif command == b'c':
@@ -128,7 +138,7 @@ if __name__ == "__main__":
     
     while True:
         print ('\033[2J________Running__LAB03________ \r\n'
-           'Press \"a\" or \"b\" to step motor 1 or 2 20 radians.'
+           'Press \"a\" or \"b\" to step motor 1 or 2. Or \"d\" for both'
            'Press \"c\" to stop and show diagnostics.')
     
         keyShare = task_share.Share ('h', thread_protect = False, name = "Share 0")
@@ -164,5 +174,5 @@ if __name__ == "__main__":
         # Print a table of task data and a table of shared information data
         print ('\n' + str (cotask.task_list))
         print (task_share.show_all ())
-        print (task1.get_trace ())
+        #print (task1.get_trace ())
         print ('\r\n')

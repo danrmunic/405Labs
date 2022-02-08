@@ -1,13 +1,14 @@
 """!
-@file basic_tasks.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
-
-@author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
-@copyright (c) 2015-2021 by JR Ridgely and released under the GNU
-    Public License, Version 2. 
+    @file main.py
+    @details Runs main logic and loops through tasks
+    @details This file contains a program that runs 3 tasks (motor1, motor2 and a usertask), and
+        inter-task shared variable containing commands. for weather to step or not. 
+        This file is meant to help us choose an appropiate motor period.
+        The user can exit program by pressing cntrl+c
+    @author Rodi Diaz
+    @author Daniel Munic
+    @author John Bennett
+    @date Febuary 7, 2022   
 """
 
 import gc
@@ -19,6 +20,9 @@ import closedLoop
 import Encoder
 
 def check_user_input(prompt):
+    '''!@brief Verifies that input is a valid int or float
+        @param propmt The input from the user
+    '''
     while True:
         try:
             # Convert it into float
@@ -28,9 +32,13 @@ def check_user_input(prompt):
             print("No.. "+ num +" input is not a number. It's a string. Enter a Number")
 
 def task_motor1 ():
-    """
-    Task which
-    """   
+    '''!@brief Initializes and creates a motor object in order to move motor 1. 
+        @details Creates timer channels that will be used specific to each motor channel to control motor function.
+                Creates varriables that will be the motors pins as well as the encoder's pins.
+                Creates a closed loop controller with a Kp of 50
+                Using the encoder, and closed loop controller, update the position of the
+                motor in regular intervals of 10ms until it reaches its final position.
+    '''
     ## motor 1 timer (3)
     tim3 = pyb.Timer(3, freq = 20000)
     ## motor 1 pin B4
@@ -68,9 +76,13 @@ def task_motor1 ():
         yield (0)
     
 def task_motor2 ():
-    """
-    Task which
-    """   
+    '''!@brief Initializes and creates a motor object in order to move motor 2. 
+        @details Creates timer channels that will be used specific to each motor channel to control motor function.
+                Creates varriables that will be the motors pins as well as the encoder's pins.
+                Creates a closed loop controller with a Kp of 50
+                Using the encoder, and closed loop controller, update the position of the
+                motor in regular intervals of 10ms until it reaches its final position.
+    '''
     # motor 2
     ## motor 2 timer (5)
     tim5 = pyb.Timer(5, freq = 20000)
@@ -108,9 +120,13 @@ def task_motor2 ():
         yield (0)
 
 def task_user ():
-    """
-    Task which
-    """
+    '''!@brief Reads data from USB comm port.
+        @details Checks to see if there is any new inputs from the comm port.
+                Will step motor 1 if 'a' is pressed.
+                Will step motor 2 if 'b' is pressed.
+                Will stop motors and show diagnostics if 'c' is pressed.
+                Will step motor 1 and 2 if 'd' is pressed.
+    '''
     vcp = pyb.USB_VCP ()
     
     while True:
@@ -137,42 +153,50 @@ def task_user ():
 if __name__ == "__main__":
     
     while True:
-        print ('\033[2J________Running__LAB03________ \r\n'
-           'Press \"a\" or \"b\" to step motor 1 or 2. Or \"d\" for both'
-           'Press \"c\" to stop and show diagnostics.')
-    
-        keyShare = task_share.Share ('h', thread_protect = False, name = "Share 0")
+        try:
+            print ('\033[2J________Running__LAB03________ \r\n'
+               'Press \"a\" or \"b\" to step motor 1 or 2. Or \"d\" for both'
+               'Press \"c\" to stop and show diagnostics.')
         
-        num = check_user_input("Select a motor Period:")
-        
-        # Create the tasks. If trace is enabled for any task, memory will be
-        # allocated for state transition tracing, and the application will run out
-        # of memory after a while and quit. Therefore, use tracing only for 
-        # debugging and set trace to False when it's not needed
-        task1 = cotask.Task (task_motor1, name = 'Task_Motor1', priority = 1, 
-                         period = num, profile = True, trace = False)
-        task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 1, 
+            keyShare = task_share.Share ('h', thread_protect = False, name = "Share 0")
+            
+            num = check_user_input("Select a motor Period:")
+            
+            # Create the tasks. If trace is enabled for any task, memory will be
+            # allocated for state transition tracing, and the application will run out
+            # of memory after a while and quit. Therefore, use tracing only for 
+            # debugging and set trace to False when it's not needed
+            ## Creates motor1 task
+            task1 = cotask.Task (task_motor1, name = 'Task_Motor1', priority = 1, 
                              period = num, profile = True, trace = False)
-        task3 = cotask.Task (task_user, name = 'Task_User', priority = 1, 
-                             period = 100, profile = True, trace = False)
-        cotask.task_list = cotask.TaskList()
-        cotask.task_list.append (task1)
-        cotask.task_list.append (task2)
-        cotask.task_list.append (task3)
-        
-        # Run the memory garbage collector to ensure memory is as defragmented as
-        # possible before the real-time scheduler is started
-        gc.collect ()
-        
-        # Run the scheduler with the chosen scheduling algorithm. Quit if any 
-        # character is received through the serial port
-        while keyShare.get() != -1:
-            cotask.task_list.pri_sched ()
-        
-        keyShare.put(2318008)
-        
-        # Print a table of task data and a table of shared information data
-        print ('\n' + str (cotask.task_list))
-        print (task_share.show_all ())
-        #print (task1.get_trace ())
-        print ('\r\n')
+            ## Creates motor2 task
+            task2 = cotask.Task (task_motor2, name = 'Task_Motor2', priority = 1, 
+                                 period = num, profile = True, trace = False)
+            ## Creates user task
+            task3 = cotask.Task (task_user, name = 'Task_User', priority = 1, 
+                                 period = 100, profile = True, trace = False)
+            cotask.task_list = cotask.TaskList()
+            cotask.task_list.append (task1)
+            cotask.task_list.append (task2)
+            cotask.task_list.append (task3)
+            
+            # Run the memory garbage collector to ensure memory is as defragmented as
+            # possible before the real-time scheduler is started
+            gc.collect ()
+            
+            # Run the scheduler with the chosen scheduling algorithm. Quit if any 
+            # character is received through the serial port
+            while keyShare.get() != -1:
+                cotask.task_list.pri_sched ()
+            
+            keyShare.put(2318008)
+            
+            # Print a table of task data and a table of shared information data
+            print ('\n' + str (cotask.task_list))
+            print (task_share.show_all ())
+            #print (task1.get_trace ())
+            print ('\r\n')
+        except KeyboardInterrupt:
+                break
+    
+    print('Program Terminating')

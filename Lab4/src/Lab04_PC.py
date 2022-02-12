@@ -1,6 +1,6 @@
 '''!
-    @file Lab03_PC.py
-    @brief Runs PC Code that Communicates with the micro Python Board through the serial board running Lab03 and plots responce.
+    @file Lab04_PC.py
+    @brief Runs PC Code that Communicates with the micro Python Board through the serial board running Lab04 and plots responce.
     @author Rodolfo Diaz
     @author Daniel Munic
     @author John Bennett
